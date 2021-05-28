@@ -8,14 +8,27 @@ import { SearchOutlined } from '@material-ui/icons'
 import SidebarChat from './SidebarChat';
 import db from './firebase'
 import { useStateValue } from './StateProvider'
+import roomService from './services/roomService'
 
 function Sidebar() {
     
     const [rooms, setRooms] = useState([]);
     const [{user},dispatch]=useStateValue();
+    const [room,setRoom]=useState("");
     
     useEffect(() => {
-        const unsubscribe = db.collection('rooms').onSnapshot(snapshot => (
+        getRoom();
+        getRoomInfomation();
+        // return () => {
+            
+        // }
+    
+    }, [])
+
+
+    const getRoomInfomation=() =>{
+        // console.log("room",room);
+        const unsubscribe = db.collection('room').onSnapshot(snapshot => (
             setRooms(snapshot.docs.map(doc => (
                 {
                     id: doc.id,
@@ -24,12 +37,13 @@ function Sidebar() {
             )
             ))
         ));
+    }
 
-        return () => {
-            unsubscribe();
-        }
-    
-    }, [])
+    const getRoom = async () => {
+        let response = await roomService.getRoom();
+        console.log(response.data.room_id);
+        setRoom(response?.data?.room_id);
+      }
     
     return (
         <div className="sidebar">
@@ -47,14 +61,14 @@ function Sidebar() {
                     </IconButton>
                 </div>
             </div>
-            <div className="sidebar__search">
+            {/* <div className="sidebar__search">
                 <div className="sidebar__searchContainer">
                     <SearchOutlined/>
                     <input placeholder="Seach or start a new chat" type="text"></input>
                 </div>
-            </div>
+            </div> */}
             <div className="sidebar__chats">
-            <SidebarChat addNewChat/>
+            {/* <SidebarChat addNewChat/> */}
             {rooms.map(room=> (
                     <SidebarChat key={room.id} id={room.id} name={room.data.name}/>
                 ))}
